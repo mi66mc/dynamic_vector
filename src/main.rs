@@ -8,5 +8,6 @@ fn main() {
     v.push(2);
     v.push(3);
 
-    println!("{:?}", v);
+    println!("{:#?}", v);
+    println!("{}", v);
 }

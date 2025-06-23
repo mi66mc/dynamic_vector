@@ -86,8 +86,7 @@ impl<T> Vector<T> {
         self.capacity
     }
 }
-
-impl<T: fmt::Debug> fmt::Debug for Vector<T> {
+impl<T: fmt::Display> fmt::Display for Vector<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "[")?;
         for i in 0..self.size {
@@ -95,9 +94,44 @@ impl<T: fmt::Debug> fmt::Debug for Vector<T> {
                 write!(f, ", ")?;
             }
             unsafe {
-                write!(f, "{:?}", &*self.data.add(i))?;
+                write!(f, "{}", &*self.data.add(i))?;
             }
         }
         write!(f, "]")
+    }
+}
+
+impl<T: fmt::Debug> fmt::Debug for Vector<T> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if f.alternate() {
+            write!(f, "VECTOR {{\n  SIZE: {:?},\n  CAPACITY: {:?},\n  FIXED: {:?},\n  CONTENTS:\n  [\n   ", self.size, self.capacity, self.fixed)?;
+            for i in 0..self.size {
+                if i > 0 {
+                    write!(f, ",\n   ")?;
+                }
+                unsafe {
+                    write!(f, "{:?}", &*self.data.add(i))?;
+                }
+            }
+            write!(f, "\n  ]\n}}")
+        } else {
+            write!(
+                f,
+                "VECTOR {{ SIZE: {:?}, CAPACITY: {:?}, FIXED: {:?}, CONTENTS: ",
+                self.size,
+                self.capacity,
+                self.fixed
+            )?;
+            write!(f, "[")?;
+            for i in 0..self.size {
+                if i > 0 {
+                    write!(f, ", ")?;
+                }
+                unsafe {
+                    write!(f, "{:?}", &*self.data.add(i))?;
+                }
+            }
+            write!(f, "] }}")
+        }
     }
 }
