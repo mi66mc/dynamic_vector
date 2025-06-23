@@ -37,10 +37,12 @@ impl<T> Vector<T> {
             }
             unsafe {
                 let new_cap = (self.scale_fn)(self.capacity);
+                assert!(new_cap > self.capacity, "Scale must increase capacity.");
 
                 let layout = alloc::Layout::array::<T>(self.capacity).expect("Invalid layout.");
+                let new_layout = alloc::Layout::array::<T>(new_cap).expect("Invalid layout.");
 
-                let ptr = alloc::realloc(self.data as *mut u8, layout, new_cap);
+                let ptr = alloc::realloc(self.data as *mut u8, layout, new_layout.size());
 
                 self.capacity = new_cap;
 
@@ -49,8 +51,6 @@ impl<T> Vector<T> {
                 }
 
                 self.data = ptr as *mut T;
-
-                self.capacity = (self.scale_fn)(self.capacity);
             }
         }
         unsafe {
