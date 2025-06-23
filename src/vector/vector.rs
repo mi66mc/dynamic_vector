@@ -78,6 +78,22 @@ impl<T> Vector<T> {
         }
     }
 
+    pub fn drop_last(&mut self) {
+        if self.is_empty() {
+            return;
+        }
+
+        self.size -= 1;
+
+        unsafe {
+            ptr::drop_in_place(self.data.add(self.size));
+        }
+    }
+
+    pub fn is_empty(&self) -> bool {
+        self.size == 0
+    }
+
     pub fn get_size(&self) -> usize {
         self.size
     }
@@ -86,6 +102,20 @@ impl<T> Vector<T> {
         self.capacity
     }
 }
+
+impl<T> Drop for Vector<T> {
+    fn drop(&mut self) {
+        unsafe {
+            for i in 0..self.size {
+                ptr::drop_in_place(self.data.add(i));
+            }
+
+            let layout = alloc::Layout::array::<T>(self.capacity).expect("Invalid layout");
+            alloc::dealloc(self.data as *mut u8, layout);
+        }
+    }
+}
+
 impl<T: fmt::Display> fmt::Display for Vector<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "[")?;
@@ -104,7 +134,11 @@ impl<T: fmt::Display> fmt::Display for Vector<T> {
 impl<T: fmt::Debug> fmt::Debug for Vector<T> {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if f.alternate() {
-            write!(f, "VECTOR {{\n  SIZE: {:?},\n  CAPACITY: {:?},\n  FIXED: {:?},\n  CONTENTS:\n  [\n   ", self.size, self.capacity, self.fixed)?;
+            write!(
+                f,
+                "VECTOR {{\n  SIZE: {:?},\n  CAPACITY: {:?},\n  FIXED: {:?},\n  CONTENTS:\n  [\n   ",
+                self.size, self.capacity, self.fixed
+            )?;
             for i in 0..self.size {
                 if i > 0 {
                     write!(f, ",\n   ")?;
@@ -118,9 +152,7 @@ impl<T: fmt::Debug> fmt::Debug for Vector<T> {
             write!(
                 f,
                 "VECTOR {{ SIZE: {:?}, CAPACITY: {:?}, FIXED: {:?}, CONTENTS: ",
-                self.size,
-                self.capacity,
-                self.fixed
+                self.size, self.capacity, self.fixed
             )?;
             write!(f, "[")?;
             for i in 0..self.size {
