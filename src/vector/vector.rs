@@ -90,6 +90,26 @@ impl<T> Vector<T> {
         }
     }
 
+    pub fn fit_in(&mut self) {
+        if self.fixed || self.size >= self.capacity || self.size == 0 {
+            return;
+        }
+
+        unsafe {
+            let layout = alloc::Layout::array::<T>(self.capacity).expect("Invalid layout");
+            let new_layout = alloc::Layout::array::<T>(self.size).expect("Invalid layout");
+
+            let ptr = alloc::realloc(self.data as *mut u8, layout, new_layout.size());
+
+            if ptr.is_null() {
+                panic!("Failed reallocating memory.");
+            }
+
+            self.data = ptr as *mut T;
+            self.capacity = self.size;
+        }
+    }
+
     pub fn is_empty(&self) -> bool {
         self.size == 0
     }

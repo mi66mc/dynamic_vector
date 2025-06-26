@@ -18,12 +18,10 @@ fn main() {
     v.push(2);
     v.push(3);
 
-    v.push(2);
-    v.push(3);
+    println!("{:#?}", v);
+    println!("{}", v);
 
-    v.push(2);
-    v.push(3);
-
+    v.fit_in();
 
     println!("{:#?}", v);
     println!("{}", v);
