@@ -21,7 +21,8 @@ fn main() {
     println!("{:#?}", v);
     println!("{}", v);
 
-    v.fit_in();
+    v.reallocate(10);
+    let a:Vec<i32> = vec![];
 
     println!("{:#?}", v);
     println!("{}", v);

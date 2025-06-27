@@ -110,6 +110,26 @@ impl<T> Vector<T> {
         }
     }
 
+    pub fn reallocate(&mut self, size: usize) {
+        assert!(size > 0);
+        if self.size > size {
+            panic!("Can not reallocate to a lower number than the actual size of the Vector.");
+        }
+        unsafe {
+            let layout = alloc::Layout::array::<T>(self.capacity).expect("Invalid layout");
+            let new_layout = alloc::Layout::array::<T>(size).expect("Invalid layout");
+
+            let ptr = alloc::realloc(self.data as *mut u8, layout, new_layout.size());
+
+            if ptr.is_null() {
+                panic!("Failed reallocating memory.");
+            }
+
+            self.data = ptr as *mut T;
+            self.capacity = size;
+        }
+    }
+
     pub fn is_empty(&self) -> bool {
         self.size == 0
     }
